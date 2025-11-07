@@ -9,7 +9,15 @@ public class Task {
     private Boolean completed;
     private Scanner input;
 
-    public Task() {}
+    public Task() {
+        this.completed = false;
+    }
+
+    public Task(String taskTitle, String taskDescription, Boolean completed) {
+        this.taskTitle = taskTitle;
+        this.taskDescription = taskDescription;
+        this.completed = completed;
+    }
 
     public void initializeTask() {
         System.out.println("Adding Task");
@@ -17,9 +25,15 @@ public class Task {
 
         System.out.println("Enter Task Title: ");
         setTaskTitle(input.nextLine());
+        if (getTaskTitle().isEmpty()) {
+            setTaskTitle("No Title");
+        }
 
         System.out.println("Enter Task Description: ");
         setTaskDescription(input.nextLine());
+        if (getTaskDescription().isEmpty()) {
+            setTaskDescription("No Description");
+        }
 
         this.completed = false;
     }
