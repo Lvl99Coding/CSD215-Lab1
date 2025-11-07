@@ -1,7 +1,6 @@
 package lab1;
 
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.*;
 
 public class App {
@@ -20,7 +19,7 @@ public class App {
     private final ArrayList<Task> tasks = new ArrayList<>();
     private final PrintStream out;
     private Scanner input;
-
+    private File toDoFile = new File("C:\\Users\\Caleb\\Desktop\\toDoList.txt");
 
     public App() {
         this(System.in, System.out);
@@ -34,8 +33,8 @@ public class App {
 
     public void run() {
         boolean done = false;
+        getAllFileTasks();
         while (!done) {
-
 
             try {
                 System.out.println(menu);
@@ -47,6 +46,7 @@ public class App {
                         Task newTask = new Task();
                         newTask.initializeTask();
                         tasks.add(newTask);
+                        writeToFile(newTask);
                         break;
                     case 2:
                         System.out.println("Complete Task:\n");
@@ -64,7 +64,8 @@ public class App {
                         System.out.println("Which task is completed?:");
                         int sellBookChoice = input.nextInt();
                         Task taskCompleted = taskArrayList.get(sellBookChoice - 1);
-                        taskCompleted.complete();
+                        taskCompleted.setCompleted(true);
+                        completeTaskInFile(taskCompleted);
                         break;
 
                     case 3:
@@ -73,7 +74,9 @@ public class App {
                             if (task.getCompleted()) {
                                 tasks.remove(task);
                             }
+
                         }
+                        deleteCompletedFromFile();
                         break;
                     case 4:
                         System.out.println("List of Tasks:");
@@ -100,4 +103,92 @@ public class App {
             }
         }
     }
+
+    private void writeToFile(Task task){
+        try(PrintWriter toDoWriter = new PrintWriter(toDoFile)){
+            String status;
+            if (task.getCompleted()){
+                status = "Complete";
+            }else{
+                status = "Not Complete";
+            }
+            toDoWriter.append("Task:" + task.getTaskTitle() + ",\n" +
+                    " Description:" + task.getTaskDescription() + ",\n" +
+                    " Status:" + status);
+            toDoWriter.append("");
+            toDoWriter.append("");
+        } catch (Exception e){
+            System.out.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    private void getAllFileTasks() {
+        try (Scanner fileReader = new Scanner(toDoFile)) {
+            while (fileReader.hasNextLine()) {
+                String line = fileReader.nextLine();
+                String[] parts = line.split(",");
+                if (parts.length == 3) {
+                    Task fileTask = new Task();
+                    fileTask.setTaskTitle(parts[0]);
+                    fileTask.setTaskDescription(parts[1]);
+
+                    if (parts[2].equals("true")) {
+                        fileTask.setCompleted(true);
+                    } else {
+                        fileTask.setCompleted(false);
+                    }
+                    tasks.add(fileTask);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error reading from file: " + e.getMessage());
+        }
+    }
+
+        public void completeTaskInFile(Task task) {
+            if (toDoFile.exists()) {
+                try (Scanner fileReader = new Scanner(toDoFile)) {
+                    int count = 0;
+                    int toCompleteLine = 0;
+                    while (fileReader.hasNextLine()) {
+                        count++;
+                        String line = fileReader.nextLine();
+                        String[] parts = line.split(",");
+                        if (parts[count] == task.getTaskTitle()) {
+                            toCompleteLine = count + 2; // Assuming status is two lines after title
+                        }
+                        if (count == toCompleteLine) {
+                            parts[count] = " Status:Complete";
+                            break;
+                        }
+
+                    }
+                }catch (Exception e){
+                    System.out.println("Error updating file: " + e.getMessage());
+                }
+            }
+        }
+
+        public void deleteCompletedFromFile() {
+            if (toDoFile.exists()) {
+                try (Scanner fileReader = new Scanner(toDoFile)) {
+                    int count = 0;
+                    while (fileReader.hasNextLine()) {
+                        count++;
+                        String line = fileReader.nextLine();
+                        String[] parts = line.split(",");
+
+                        if (parts[count].contains("Status:Complete")) {
+                            parts[count] = "";
+                            parts[count-1] = "";
+                            parts[count-2] = "";
+                        }
+
+                    }
+                }catch (Exception e){
+                    System.out.println("Error updating file: " + e.getMessage());
+                }
+            }
+        }
+
 }

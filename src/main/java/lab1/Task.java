@@ -44,8 +44,8 @@ public class Task {
         return completed;
     }
 
-    public void complete() {
-        this.completed = true;
+    public void setCompleted(Boolean completed) {
+        this.completed = completed;
     }
 
 }
